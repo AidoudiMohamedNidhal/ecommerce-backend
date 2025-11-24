@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  name       String?
+  role       String   @default("USER")
+  createdAt  DateTime @default(now())
+
+  // relation: user عندو برشا commandes
+  orders     Order[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  image       String?
+  createdAt   DateTime @default(now())
+
+  // relation: produit ينجم يكون في برشا OrderItem
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  total      Float
+  createdAt  DateTime  @default(now())
+
+  // relation مع User
+  user       User      @relation(fields: [userId], references: [id])
+
+  // relation مع OrderItem
+  items      OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+
+  // relation مع Order
+  order     Order   @relation(fields: [orderId], references: [id])
+
+  // relation مع Product
+  product   Product @relation(fields: [productId], references: [id])
+}
